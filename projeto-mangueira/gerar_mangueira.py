@@ -16,17 +16,28 @@ ax.add_patch(mpatches.Rectangle((-6, -6), LARGO+12, ALTO+12,
 
 x0, y0, x1, y1 = desenhar_mangueira(ax, 0, 0, LARGO, ALTO, R, simples=False)
 
-# seta de fluxo do gado nos 3 piquetes da esquerda e da direita, convergindo
-# para o corredor central de manejo
+CORREDOR_H = 4.0
+cy0 = ALTO/2 - CORREDOR_H/2
+cy1 = ALTO/2 + CORREDOR_H/2
+linha_h = ALTO/2 - CORREDOR_H/2
+
+# seta de fluxo do gado: percorre a fileira de cima e a de baixo, e desce/sobe
+# pelo portao central para o corredor de manejo
 def seta(x_ini, x_fim, y, cor="#b23b23"):
     ax.annotate("", xy=(x_fim, y), xytext=(x_ini, y),
                 arrowprops=dict(arrowstyle="-|>", color=cor, lw=2.0,
                                  linestyle=(0, (6, 3))))
 
-seta(4, 25, ALTO*0.28)
-seta(56, 35, ALTO*0.28)
-seta(4, 25, ALTO*0.72)
-seta(56, 35, ALTO*0.72)
+def seta_v(x, y_ini, y_fim, cor="#b23b23"):
+    ax.annotate("", xy=(x, y_fim), xytext=(x, y_ini),
+                arrowprops=dict(arrowstyle="-|>", color=cor, lw=2.0,
+                                 linestyle=(0, (6, 3))))
+
+seta(4, 56, cy1 + linha_h/2)          # fileira de cima: esquerda -> direita
+seta(56, 4, y0 + linha_h/2)           # fileira de baixo: direita -> esquerda
+seta_v(LARGO/2, cy1 + linha_h*0.35, cy1 + 0.3)   # desce da fileira de cima p/ o corredor
+seta_v(LARGO/2, y0 + linha_h*0.65, cy0 - 0.3)    # sobe da fileira de baixo p/ o corredor
+
 
 # cotas
 def cota_h(y, xi, xf, texto):
@@ -50,8 +61,8 @@ ax.annotate("cantos arredondados\n(facilita o giro do gado)",
 ax.annotate("", xy=(x0+2, ALTO-2), xytext=(x0+3, ALTO+9),
             arrowprops=dict(arrowstyle="->", color="#4a3b28", lw=1.2))
 
-ax.text(LARGO/2, ALTO+16, "Projeto de Mangueira — 60 m x 40 m — 6 divisões + brete central",
-        ha="center", va="bottom", fontsize=16.5, fontweight="bold", color="#2b2210")
+ax.text(LARGO/2, ALTO+16, "Projeto de Mangueira — 60 m x 40 m — 3 divisões em cima e 3 embaixo + brete central",
+        ha="center", va="bottom", fontsize=15.5, fontweight="bold", color="#2b2210")
 ax.text(LARGO/2, ALTO+12.3, "Fazenda Largo Fechado  •  Área total ≈ 1015 ha",
         ha="center", va="bottom", fontsize=11.5, color="#5a4a30")
 

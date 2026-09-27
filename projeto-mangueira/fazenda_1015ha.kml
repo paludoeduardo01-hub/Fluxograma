@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document id="document">
+	<name>Arquivo KML sem título</name>
+	<visibility>0</visibility>
+	<gx:CascadingStyle kml:id="__managed_style_0EA2619FE640CA4E2473_highlight">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.1.0.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/document/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>2.13333</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_0EA2619FE640CA4E2473_normal">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.1.0.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/document/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>1.42222</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_0EA2619FE640CA4E2473">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_0EA2619FE640CA4E2473_normal</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_0EA2619FE640CA4E2473_highlight</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Placemark id="0A9EC70D0840CA4E244A">
+		<name>fazenda largo fechado</name>
+		<LookAt>
+			<longitude>-56.69105972506733</longitude>
+			<latitude>-20.30478972297591</latitude>
+			<altitude>122.6123011530042</altitude>
+			<heading>318.1895165107654</heading>
+			<tilt>0</tilt>
+			<gx:fovy>35</gx:fovy>
+			<range>5372.756289963727</range>
+			<altitudeMode>absolute</altitudeMode>
+		</LookAt>
+		<styleUrl>#__managed_style_0EA2619FE640CA4E2473</styleUrl>
+		<Polygon>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>
+						-56.69062903872861,-20.30457547268497,0 -56.69313047646855,-20.28085322359451,0 -56.69449714257753,-20.27188027659777,0 -56.69696223063269,-20.26061641854929,0 -56.71030435000495,-20.25918714369461,0 -56.70912617506315,-20.27289391482228,0 -56.70001927822826,-20.27218584690011,0 -56.69925987690076,-20.28146725188421,0 -56.70814562648636,-20.28228308400409,0 -56.70754034432255,-20.28841673690964,0 -56.70444139939671,-20.29056612085586,0 -56.69825774949093,-20.2902972848095,0 -56.6972431556734,-20.30396222408033,0 -56.69062903872861,-20.30457547268497,0 
+					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+	</Placemark>
+</Document>
+</kml>

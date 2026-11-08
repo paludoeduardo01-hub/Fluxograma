@@ -48,6 +48,7 @@ td.n,th.n{text-align:right}
 .err{color:var(--red);font-size:13px;min-height:1em;margin-top:6px}
 .empty{color:var(--mut);padding:10px 0}
 .hint{color:var(--mut);font-size:13px;margin:0 0 10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}.modal>div{background:var(--card);border-radius:10px;padding:18px;max-width:420px;width:100%}.modal p{margin:0 0 14px}.modal .row{justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -61,6 +62,7 @@ td.n,th.n{text-align:right}
 </header>
 <nav id="nav"></nav>
 <main id="app"></main>
+<div id="modal" class="modal hide"><div><p id="mmsg"></p><div class="row"><button class="btn sec" id="mno">Cancelar</button><button class="btn" id="myes">OK</button></div></div></div>
 
 <script>
 const KEY='fazenda_v1';
@@ -88,7 +90,21 @@ function load(){
     {id:uid(),nome:'Touros',qtd:0,valor:0}],
     movs:[],lancs:[],obras:[],custos:[]};
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function ask(msg,info){return new Promise(res=>{$('#mmsg').textContent=msg;$('#mno').classList.toggle('hide',!!info);$('#modal').classList.remove('hide');
+  const f=v=>{$('#modal').classList.add('hide');res(v)};$('#myes').onclick=()=>f(true);$('#mno').onclick=()=>f(false)})}
+const say=m=>ask(m,true);
+let DB=null;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+  if(DB)DB.set(JSON.parse(JSON.stringify(S))).catch(()=>{})}
+async function initDb(){
+  try{const c=window.claude&&await window.claude.use('db');if(!c)return;
+    const ref=c.doc('fazenda/estado');let first=true;
+    ref.onSnapshot(snap=>{
+      if(snap.exists){const d=JSON.parse(JSON.stringify(snap.data()));if(d.cats){S=d;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}render()}}
+      else if(first){DB=ref;if(S.movs.length||S.lancs.length||S.obras.length||S.cats.some(c=>c.qtd))save()}
+      if(first){DB=ref;first=false}
+    },()=>{});
+  }catch(e){}}
 function commit(){save();render()}
 
 /* ---------- cálculos ---------- */
@@ -164,9 +180,9 @@ function vRebanho(){
 function addCat(e){e.preventDefault();const f=new FormData(e.target);
   S.cats.push({id:uid(),nome:f.get('nome').trim(),qtd:Math.floor(+f.get('qtd'))||0,valor:+f.get('valor')||0});commit()}
 function setValor(id,v){S.cats.find(c=>c.id===id).valor=Math.max(0,+v||0);commit()}
-function delCat(id){const c=S.cats.find(x=>x.id===id);
-  if(S.movs.some(m=>m.catId===id)){alert('Esta categoria tem movimentações. Desfaça-as antes de remover.');return}
-  if(confirm(`Remover "${c.nome}"?`)){S.cats=S.cats.filter(x=>x.id!==id);commit()}}
+async function delCat(id){const c=S.cats.find(x=>x.id===id);
+  if(S.movs.some(m=>m.catId===id)){await say('Esta categoria tem movimentações. Desfaça-as antes de remover.');return}
+  if(await ask(`Remover "${c.nome}"?`)){S.cats=S.cats.filter(x=>x.id!==id);commit()}}
 const SINAL={venda:-1,morte:-1,compra:1,nascimento:1};
 function addMov(e){e.preventDefault();const f=new FormData(e.target);
   const tipo=f.get('tipo'),catId=f.get('cat'),qtd=Math.floor(+f.get('qtd')),valor=+f.get('valor')||0,data=f.get('data'),obs=f.get('obs').trim();
@@ -182,10 +198,10 @@ function addMov(e){e.preventDefault();const f=new FormData(e.target);
     S.lancs.push({id:uid(),data,tipo:tipo==='venda'?'receita':'despesa',cat:tipo==='venda'?'Venda de gado':'Compra de gado',desc:`${tipo==='venda'?'Venda':'Compra'} de ${qtd} ${c.nome}${obs?' – '+obs:''}`,valor:qtd*valor,movId:m.id});
   }
   S.movs.push(m);commit()}
-function delMov(id){const m=S.movs.find(x=>x.id===id),c=S.cats.find(x=>x.id===m.catId);
-  if(!c){alert('Categoria não existe mais.');return}
-  if(c.qtd-SINAL[m.tipo]*m.qtd<0){alert('Não é possível desfazer: o rebanho ficaria negativo.');return}
-  if(!confirm('Desfazer esta movimentação? O rebanho e o lançamento financeiro serão revertidos.'))return;
+async function delMov(id){const m=S.movs.find(x=>x.id===id),c=S.cats.find(x=>x.id===m.catId);
+  if(!c){await say('Categoria não existe mais.');return}
+  if(c.qtd-SINAL[m.tipo]*m.qtd<0){await say('Não é possível desfazer: o rebanho ficaria negativo.');return}
+  if(!await ask('Desfazer esta movimentação? O rebanho e o lançamento financeiro serão revertidos.'))return;
   c.qtd-=SINAL[m.tipo]*m.qtd;
   S.lancs=S.lancs.filter(l=>l.movId!==id);S.movs=S.movs.filter(x=>x.id!==id);commit()}
 
@@ -214,7 +230,7 @@ function vFin(){
 function trocaCats(sel){$('#selCat').innerHTML=(sel.value==='receita'?CATS_REC:CATS_DESP).map(c=>`<option>${c}</option>`).join('')}
 function addLanc(e){e.preventDefault();const f=new FormData(e.target);
   S.lancs.push({id:uid(),data:f.get('data'),tipo:f.get('tipo'),cat:f.get('cat'),desc:f.get('desc').trim(),valor:+f.get('valor')});commit()}
-function delLanc(id){if(confirm('Excluir lançamento?')){S.lancs=S.lancs.filter(l=>l.id!==id);commit()}}
+async function delLanc(id){if(await ask('Excluir lançamento?')){S.lancs=S.lancs.filter(l=>l.id!==id);commit()}}
 
 /* ---------- BENFEITORIAS ---------- */
 const STATUS=['Planejada','Em andamento','Concluída'];
@@ -256,20 +272,24 @@ function vObras(){
 function addObra(e){e.preventDefault();const f=new FormData(e.target);
   S.obras.push({id:uid(),nome:f.get('nome').trim(),orcamento:+f.get('orc')||0,status:f.get('status'),obs:f.get('obs').trim()});commit()}
 function setStatus(id,v){S.obras.find(o=>o.id===id).status=v;commit()}
-function delObra(id){if(confirm('Excluir benfeitoria e todos os seus custos?')){S.obras=S.obras.filter(o=>o.id!==id);S.custos=S.custos.filter(c=>c.obraId!==id);commit()}}
+async function delObra(id){if(await ask('Excluir benfeitoria e todos os seus custos?')){S.obras=S.obras.filter(o=>o.id!==id);S.custos=S.custos.filter(c=>c.obraId!==id);commit()}}
 function addCusto(e,obraId){e.preventDefault();const f=new FormData(e.target);
   S.custos.push({id:uid(),obraId,data:f.get('data'),desc:f.get('desc').trim(),forn:f.get('forn').trim(),valor:+f.get('valor')});commit()}
-function delCusto(id){if(confirm('Excluir custo?')){S.custos=S.custos.filter(c=>c.id!==id);commit()}}
+async function delCusto(id){if(await ask('Excluir custo?')){S.custos=S.custos.filter(c=>c.id!==id);commit()}}
 
 /* ---------- backup ---------- */
-function exportar(){const a=document.createElement('a');
+async function exportar(){
+  try{const d=window.claude&&await window.claude.use('downloads');
+    if(d){await d.save({filename:`fazenda-backup-${hoje()}.json`,data:JSON.stringify(S,null,1)});return}}catch(e){return}
+  const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));
   a.download=`fazenda-backup-${hoje()}.json`;a.click()}
-function importar(e){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);
-  if(!d.cats)throw 0;if(confirm('Substituir todos os dados atuais pelo backup?')){S=d;commit()}}catch(_){alert('Arquivo inválido.')}};
+function importar(e){const r=new FileReader();r.onload=async()=>{try{const d=JSON.parse(r.result);
+  if(!d.cats)throw 0;if(await ask('Substituir todos os dados atuais pelo backup?')){S=d;commit()}}catch(_){await say('Arquivo inválido.')}};
   r.readAsText(e.target.files[0]);e.target.value=''}
 
 render();
+initDb();
 </script>
 </body>
 </html>

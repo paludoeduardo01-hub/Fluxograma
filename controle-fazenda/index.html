@@ -127,7 +127,7 @@ function render(){
 function vResumo(){
   const rec=somaLanc('receita'),desp=somaLanc('despesa'),obras=totalObras();
   const saldo=rec-desp-obras;
-  const rows=S.cats.map(c=>`<tr><td>${esc(c.nome)}</td><td class="n">${num(c.qtd)}</td><td class="n">${brl(c.valor)}</td><td class="n">${brl(c.qtd*c.valor)}</td></tr>`).join('');
+  const rows=S.cats.map(c=>`<tr><td>${esc(c.nome)}</td><td class="n"><input style="width:90px;text-align:right" type="number" min="0" step="1" value="${c.qtd}" onchange="setQtd('${c.id}',this.value)"></td><td class="n">${brl(c.valor)}</td><td class="n">${brl(c.qtd*c.valor)}</td></tr>`).join('');
   return `<div class="grid">
     <div class="card"><div class="k">Cabeças no rebanho</div><div class="v">${num(totalCabecas())}</div></div>
     <div class="card"><div class="k">Valor do rebanho</div><div class="v">${brl(valorRebanho())}</div></div>
@@ -146,7 +146,7 @@ function vResumo(){
 /* ---------- REBANHO ---------- */
 function vRebanho(){
   const opts=S.cats.map(c=>`<option value="${c.id}">${esc(c.nome)} (${num(c.qtd)})</option>`).join('');
-  const rows=S.cats.map(c=>`<tr><td>${esc(c.nome)}</td><td class="n">${num(c.qtd)}</td>
+  const rows=S.cats.map(c=>`<tr><td>${esc(c.nome)}</td><td class="n"><input style="width:90px;text-align:right" type="number" min="0" step="1" value="${c.qtd}" onchange="setQtd('${c.id}',this.value)"></td>
     <td class="n"><input style="width:110px;text-align:right" type="number" min="0" step="0.01" value="${c.valor}" onchange="setValor('${c.id}',this.value)"></td>
     <td class="n">${brl(c.qtd*c.valor)}</td>
     <td><button class="btn del sm" onclick="delCat('${c.id}')">Remover</button></td></tr>`).join('');
@@ -165,7 +165,7 @@ function vRebanho(){
       <label>Observação (comprador, lote...)<input name="obs"></label>
       <button class="btn">Registrar</button>
     </form><div class="err" id="errMov"></div></div>
-  <div class="card"><h2>Rebanho atual</h2><div class="tw"><table>
+  <div class="card"><h2>Rebanho atual</h2><p class="hint">Já tem gado? Digite direto o número de cabeças e o valor médio de cada categoria. Salva sozinho.</p><div class="tw"><table>
     <tr><th>Categoria</th><th class="n">Cabeças</th><th class="n">Valor médio/cabeça</th><th class="n">Total</th><th></th></tr>${rows||''}
     <tr><td><b>Total</b></td><td class="n"><b>${num(totalCabecas())}</b></td><td></td><td class="n"><b>${brl(valorRebanho())}</b></td><td></td></tr></table></div>
     <form style="margin-top:12px" onsubmit="addCat(event)">
@@ -179,6 +179,7 @@ function vRebanho(){
 }
 function addCat(e){e.preventDefault();const f=new FormData(e.target);
   S.cats.push({id:uid(),nome:f.get('nome').trim(),qtd:Math.floor(+f.get('qtd'))||0,valor:+f.get('valor')||0});commit()}
+function setQtd(id,v){S.cats.find(c=>c.id===id).qtd=Math.max(0,Math.floor(+v)||0);commit()}
 function setValor(id,v){S.cats.find(c=>c.id===id).valor=Math.max(0,+v||0);commit()}
 async function delCat(id){const c=S.cats.find(x=>x.id===id);
   if(S.movs.some(m=>m.catId===id)){await say('Esta categoria tem movimentações. Desfaça-as antes de remover.');return}
